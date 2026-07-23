@@ -1,0 +1,13 @@
+[project]
+name = "submanip"
+version = "0.1.0"
+description = "Submanip is a Checkbox submission editor"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1.3",
+]
+
+# Note: checkbox-ng (>=1.6.0) and its plainbox dependency are also required
+# at runtime, but are not published on PyPI. They must be installed from
+# ppa:checkbox-dev/edge (see systemd/submanip.service and snap/snapcraft.yaml).

@@ -19,7 +19,7 @@ from werkzeug.exceptions import BadRequestKeyError
 from checkbox_ng import __version__ as checkbox_version
 from plainbox.abc import IJobResult
 from plainbox.impl.result import outcome_meta
-from submission_utils import CheckboxSubmission
+from submanip.submission_utils import CheckboxSubmission
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -40,15 +40,13 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # required for flash messages
 @app.context_processor
 def job_result():
     """Provide job information to the Flask template"""
-    r = dict(job_result=IJobResult, job_outcome=outcome_meta)
-    return r
+    return  dict(job_result=IJobResult, job_outcome=outcome_meta)
 
 
 @app.route("/", methods=("GET", "POST"))
 def index():
     # Coming back from edition page with data to save into new JSON file
     if request.method == "POST":
-        # import pdb; pdb.set_trace()
         form_data = request.form
         filename = form_data.get("archive")
         output_file = CheckboxSubmission(filename, form_data).output_file

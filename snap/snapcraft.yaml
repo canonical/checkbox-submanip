@@ -1,0 +1,77 @@
+name: submanip
+base: core24
+version: '1.0'
+summary: Checkbox submission editor
+description: |
+  Submanip is a Checkbox submission editor. It lets you modify test
+  results and comments in a Checkbox submission archive, and saves the
+  result as a new submission archive. The snap runs Submanip as a Flask
+  web server reachable at http://localhost:3001.
+
+grade: stable
+confinement: strict
+
+# checkbox-ng / plainbox are not published on PyPI: they are only
+# available from the checkbox-dev PPA, so it is added here and the
+# corresponding deb is pulled in as a stage-package below.
+package-repositories:
+  - type: apt
+    ppa: checkbox-dev/edge
+
+apps:
+  submanip:
+    command: bin/run-submanip
+    daemon: simple
+    restart-condition: on-failure
+    plugs:
+      - network-bind
+
+parts:
+  submanip-source:
+    plugin: dump
+    source: submanip
+    organize:
+      "*": submanip/
+
+  submanip-deps:
+    plugin: nil
+    stage-packages:
+      - checkbox-ng
+
+  # Builds a self-contained venv (bin/python3, lib/python3.*/site-packages)
+  # from pyproject.toml/uv.lock, giving us Flask without hand-rolling
+  # PYTHONPATH/sys.path management for it.
+  submanip-venv:
+    plugin: uv
+    source: .
+    build-snaps:
+      - astral-uv
+
+  submanip-launcher:
+    plugin: nil
+    after:
+      - submanip-source
+      - submanip-deps
+      - submanip-venv
+    override-build: |
+      craftctl default
+      mkdir -p "$CRAFT_PART_INSTALL/bin"
+      cat > "$CRAFT_PART_INSTALL/bin/run-submanip" <<'EOF'
+      #!/bin/sh
+      set -e
+
+      # "submanip.submanip" resolves to lib/submanip/submanip/submanip.py,
+      # which is the module that defines the Flask `app` object.
+      # checkbox-ng/plainbox come from the stage-packaged deb, so they are
+      # added on top of the uv-managed venv's own site-packages.
+      export FLASK_APP=submanip.submanip
+      export FLASK_DEBUG=1
+      export PYTHONPATH="$SNAP/lib/submanip:$SNAP/usr/lib/python3/dist-packages"
+
+      # Run from a writable directory: submanip.py logs to the relative
+      # path "submanip.log", and $SNAP is a read-only squashfs mount.
+      cd "$SNAP_DATA"
+
+      exec "$SNAP/bin/python3" -m flask run --host=127.0.0.1 --port=3001
+      EOF
+      chmod +x "$CRAFT_PART_INSTALL/bin/run-submanip"
