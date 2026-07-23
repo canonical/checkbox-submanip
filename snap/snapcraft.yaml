@@ -29,9 +29,14 @@ apps:
 parts:
   submanip-source:
     plugin: dump
-    source: submanip
+    source: .
     organize:
-      "*": submanip/
+      app.py: submanip/app.py
+      submission_utils.py: submanip/submission_utils.py
+      static: submanip/static
+      templates: submanip/templates
+    prime:
+      - submanip/*
 
   submanip-deps:
     plugin: nil
@@ -60,15 +65,16 @@ parts:
       #!/bin/sh
       set -e
 
-      # "submanip.submanip" resolves to lib/submanip/submanip/submanip.py,
-      # which is the module that defines the Flask `app` object.
-      # checkbox-ng/plainbox come from the stage-packaged deb, so they are
-      # added on top of the uv-managed venv's own site-packages.
-      export FLASK_APP=submanip.submanip
+      # app.py (a flat script, not a package) and submission_utils.py live
+      # in $SNAP/lib/submanip, so put that on PYTHONPATH for "import
+      # submission_utils" to resolve. checkbox-ng/plainbox come from the
+      # stage-packaged deb, so they are added on top of the uv-managed
+      # venv's own site-packages.
+      export FLASK_APP=app
       export FLASK_DEBUG=1
       export PYTHONPATH="$SNAP/lib/submanip:$SNAP/usr/lib/python3/dist-packages"
 
-      # Run from a writable directory: submanip.py logs to the relative
+      # Run from a writable directory: app.py logs to the relative
       # path "submanip.log", and $SNAP is a read-only squashfs mount.
       cd "$SNAP_DATA"
 

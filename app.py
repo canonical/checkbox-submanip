@@ -19,7 +19,7 @@ from werkzeug.exceptions import BadRequestKeyError
 from checkbox_ng import __version__ as checkbox_version
 from plainbox.abc import IJobResult
 from plainbox.impl.result import outcome_meta
-from submanip.submission_utils import CheckboxSubmission
+from submission_utils import CheckboxSubmission
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -86,3 +86,7 @@ def subedit():
         return render_template("sub.html", data=data, archive=temp_arc)
     else:
         return redirect(url_for("index"))
+
+
+if __name__ == "__main__":
+    app.run(port=3001)
