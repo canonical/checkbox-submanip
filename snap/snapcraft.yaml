@@ -11,19 +11,12 @@ description: |
 grade: stable
 confinement: strict
 
-# checkbox-ng / plainbox are not published on PyPI: they are only
-# available from the checkbox-dev PPA, so it is added here and the
-# corresponding deb is pulled in as a stage-package below.
 package-repositories:
   - type: apt
     ppa: checkbox-dev/edge
 
-# checkbox_ng hardcodes /var/tmp/checkbox-ng/sessions as its session
-# storage directory, which strict confinement won't let the snap read or
-# write on the host. Rather than granting a system-files plug for the real
-# /var/tmp, redirect that path (inside the snap's own mount namespace only)
-# to the snap's writable data directory, so checkbox_ng sees the path it
-# expects without needing any host access at all.
+# used by checkbox-ng
+# we are not actually launching sessions, so just put it in the data dir
 layout:
   /var/tmp/checkbox-ng:
     bind: $SNAP_DATA/checkbox-ng
@@ -63,6 +56,8 @@ parts:
       - submanip-deps
     override-build: |
       craftctl default
+      # the following is written by copilot 
+      
       # checkbox-ng/plainbox and their apt-only Python dependencies (jinja2,
       # urwid, tqdm, xlsxwriter, etc.) come from the PPA deb, staged by
       # submanip-deps and installed at runtime under $SNAP/usr/lib/python3/
