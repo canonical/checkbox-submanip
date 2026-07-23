@@ -18,9 +18,19 @@ package-repositories:
   - type: apt
     ppa: checkbox-dev/edge
 
+# checkbox_ng hardcodes /var/tmp/checkbox-ng/sessions as its session
+# storage directory, which strict confinement won't let the snap read or
+# write on the host. Rather than granting a system-files plug for the real
+# /var/tmp, redirect that path (inside the snap's own mount namespace only)
+# to the snap's writable data directory, so checkbox_ng sees the path it
+# expects without needing any host access at all.
+layout:
+  /var/tmp/checkbox-ng:
+    bind: $SNAP_DATA/checkbox-ng
+
 apps:
   submanip:
-    command: bin/run-submanip
+    command: bin/python3 $SNAP/submanip/app.py
     daemon: simple
     restart-condition: on-failure
     plugs:
@@ -42,42 +52,26 @@ parts:
     plugin: nil
     stage-packages:
       - checkbox-ng
+      - python3-checkbox-ng
 
-  # Builds a self-contained venv (bin/python3, lib/python3.*/site-packages)
-  # from pyproject.toml/uv.lock, giving us Flask without hand-rolling
-  # PYTHONPATH/sys.path management for it.
   submanip-venv:
     plugin: uv
     source: .
     build-snaps:
       - astral-uv
-
-  submanip-launcher:
-    plugin: nil
     after:
-      - submanip-source
       - submanip-deps
-      - submanip-venv
     override-build: |
       craftctl default
-      mkdir -p "$CRAFT_PART_INSTALL/bin"
-      cat > "$CRAFT_PART_INSTALL/bin/run-submanip" <<'EOF'
-      #!/bin/sh
-      set -e
-
-      # app.py (a flat script, not a package) and submission_utils.py live
-      # in $SNAP/lib/submanip, so put that on PYTHONPATH for "import
-      # submission_utils" to resolve. checkbox-ng/plainbox come from the
-      # stage-packaged deb, so they are added on top of the uv-managed
-      # venv's own site-packages.
-      export FLASK_APP=app
-      export FLASK_DEBUG=1
-      export PYTHONPATH="$SNAP/lib/submanip:$SNAP/usr/lib/python3/dist-packages"
-
-      # Run from a writable directory: app.py logs to the relative
-      # path "submanip.log", and $SNAP is a read-only squashfs mount.
-      cd "$SNAP_DATA"
-
-      exec "$SNAP/bin/python3" -m flask run --host=127.0.0.1 --port=3001
-      EOF
-      chmod +x "$CRAFT_PART_INSTALL/bin/run-submanip"
+      # checkbox-ng/plainbox and their apt-only Python dependencies (jinja2,
+      # urwid, tqdm, xlsxwriter, etc.) come from the PPA deb, staged by
+      # submanip-deps and installed at runtime under $SNAP/usr/lib/python3/
+      # dist-packages, not from PyPI, so uv's own dependency resolution
+      # never installs them into the venv it builds here. Since the venv is
+      # otherwise isolated from that apt site-packages directory, add a
+      # .pth file so the venv's site machinery puts it on sys.path at
+      # interpreter startup. $SNAP only exists at runtime (not at build
+      # time), so the .pth uses an "import ..." line to resolve it then,
+      # rather than a plain path resolved now.
+      site_packages="$(echo "$CRAFT_PART_INSTALL"/lib/python3.*/site-packages)"
+      echo 'import os, sys; sys.path.append(os.path.join(os.environ["SNAP"], "usr/lib/python3/dist-packages"))' > "$site_packages/checkbox-ng.pth"
