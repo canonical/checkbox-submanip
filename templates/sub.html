@@ -39,8 +39,7 @@
     </p>
     <fieldset style="border-radius: 5px;">
       <legend>Test status</legend>
-      {% for outcome in [job_result.OUTCOME_PASS, job_result.OUTCOME_FAIL, job_result.OUTCOME_SKIP,
-      job_result.OUTCOME_NOT_SUPPORTED, job_result.OUTCOME_UNDECIDED, job_result.OUTCOME_CRASH] %}
+      {% for outcome in job_result_outcomes %}
       <input type="checkbox" id="cb_{{ outcome }}" name="cb_{{ outcome }}" onclick="toggle('{{ outcome }}')" checked>
       <label for="cb_{{ outcome }}">{{ outcome|capitalize }}</label>
       {% endfor %}
@@ -67,8 +66,7 @@
             <select form="sub" id="{{ result['full_id'] }}-outcome" name="{{ result['full_id'] }}-outcome"
               class="form-select"
               style="background-color: {{ job_outcome(result['outcome'])['color_hex'] }}; color: white;">
-              {% for outcome in [job_result.OUTCOME_PASS, job_result.OUTCOME_FAIL, job_result.OUTCOME_SKIP,
-              job_result.OUTCOME_NOT_SUPPORTED, job_result.OUTCOME_UNDECIDED, job_result.OUTCOME_CRASH] %}
+              {% for outcome in job_result_outcomes %}
               <option {% if result['outcome']==outcome %}selected{% endif %}>{{ outcome }}</option>
               {% endfor %}
             </select>

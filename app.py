@@ -40,7 +40,8 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # required for flash messages
 @app.context_processor
 def job_result():
     """Provide job information to the Flask template"""
-    return  dict(job_result=IJobResult, job_outcome=outcome_meta)
+    outcomes = [getattr(IJobResult, k) for k in dir(IJobResult) if k.startswith("OUTCOME")]
+    return dict(job_result=IJobResult, job_outcome=outcome_meta, job_result_outcomes=outcomes)
 
 
 @app.route("/", methods=("GET", "POST"))
