@@ -1,6 +1,6 @@
 name: checkbox-submanip
 base: core24
-version: '1.0'
+version: "1.0"
 summary: Checkbox submission editor
 description: |
   checkbox-submanip is a Checkbox submission editor. It lets you modify test
@@ -10,6 +10,14 @@ description: |
 
 grade: stable
 confinement: strict
+
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
 
 package-repositories:
   - type: apt
@@ -57,7 +65,7 @@ parts:
     override-build: |
       craftctl default
       # the following is written by copilot 
-      
+
       # checkbox-ng/plainbox and their apt-only Python dependencies (jinja2,
       # urwid, tqdm, xlsxwriter, etc.) come from the PPA deb, staged by
       # submanip-deps and installed at runtime under $SNAP/usr/lib/python3/
