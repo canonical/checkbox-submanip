@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Checkbox Submission Editor</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css" media="screen">
+</head>
+<script>
+	function filenameUpdate() {
+		var inputs = document.querySelectorAll('input').forEach(function (input) {
+			var label = input.nextElementSibling,
+				labelVal = label.innerHTML;
+
+			var fileName = '';
+			if (input.files && input.files.length > 1)
+				fileName = (input.getAttribute('data-multiple-caption') || '').replace('{count}', input.files.length);
+			else
+				fileName = input.files[0].name
+
+			if (fileName)
+				label.innerHTML = fileName;
+			else
+				label.innerHTML = labelVal;
+
+			// Firefox bug fix
+			input.addEventListener('focus', function () { input.classList.add('has-focus'); });
+			input.addEventListener('blur', function () { input.classList.remove('has-focus'); });
+		});
+	}
+</script>
+
+<body>
+	<header>
+		<h1>Checkbox Submission Editor</h1>
+	</header>
+	<main>
+		<p>This tool allows you to manually edit a Checkbox submission archive. To get started:</p>
+		<ol>
+			<li>Select the Checkbox submission (<code>submission.tar.xz</code>) you'd like to edit with the button
+				below.</li>
+			<li>Press the "Edit Submission" button.</li>
+		</ol>
+		<p>Once you are satisifed, you can save your changes. A new Checkbox submission archive will be generated and
+			you will be able to download it.</p>
+		<p class="warning">Please note: Submissions generated with this tool should <strong>not</strong> be uploaded to
+			C3.</p>
+		<form id="sub" enctype="multipart/form-data" action="{{ url_for('subedit') }}" method="post">
+			<p>
+				<input type="file" name="submission" id="submission" onchange="filenameUpdate()"
+					accept=".tar.xz, application/x-tar">
+				<label for="submission">Select a submission archive</label>
+			</p>
+			<p>
+				<button type="submit">Edit Submission</button>
+			</p>
+		</form>
+	</main>
+	<footer>
+		submanip v{{ metadata["submanip_version"] }} (using checkbox-ng v{{ metadata["checkbox_version"] }})
+	</footer>
+</body>
+
+</html>

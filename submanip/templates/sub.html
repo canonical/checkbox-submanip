@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Editing session {{ data['title'] }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css" media="screen">
+</head>
+<script>
+  function toggle(outcome) {
+    let rows = document.getElementsByClassName("outcome-" + outcome);
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].style.display === '') {
+        rows[i].style.display = 'none';
+      }
+      else {
+        rows[i].style.display = '';
+      }
+    }
+  }
+</script>
+
+<body>
+  <header>
+    <h1>Checkbox Submission Editor</h1>
+  </header>
+  <main>
+    <p><a href="{{ url_for('index') }}">← Back</a></p>
+    <p>
+      <label for="session-title">Session name:</label>
+      <input style="border-radius: 5px;" form="sub" name="session-title" type="text" id="session-title"
+        value="{{ data['title'] }}" />
+    </p>
+    <p>
+      <label for="session-description">Session description:</label>
+      <textarea style="border-radius: 5px;" form="sub" name="session-description" type="text" id="session-description"
+        rows="5" cols="40">{{ data['description'] }}</textarea>
+    </p>
+    <fieldset style="border-radius: 5px;">
+      <legend>Test status</legend>
+      {% for outcome in [job_result.OUTCOME_PASS, job_result.OUTCOME_FAIL, job_result.OUTCOME_SKIP,
+      job_result.OUTCOME_NOT_SUPPORTED, job_result.OUTCOME_UNDECIDED, job_result.OUTCOME_CRASH] %}
+      <input type="checkbox" id="cb_{{ outcome }}" name="cb_{{ outcome }}" onclick="toggle('{{ outcome }}')" checked>
+      <label for="cb_{{ outcome }}">{{ outcome|capitalize }}</label>
+      {% endfor %}
+    </fieldset>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Category</th>
+          <!-- <th title="Original Result" style="width: min-content;">🛈</th> -->
+          <th>Result</th>
+          <th>Cert Status</th>
+          <th style="width: 50%;">Comment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for result in data['results'] %}
+        <tr class="outcome-{{ result['outcome'] }}">
+          <td class="job-id">{{ result['id'] }}</td>
+          <!--<span class="p-tooltip__message" role="tooltip">{{ result['name'] }}</span></td>-->
+          <td>{{ result['category'] }}</td>
+          <!-- <td style="background-color: {{ job_outcome(result['outcome'])['color_hex'] }}; color: white;">{{ job_outcome(result['outcome'])['unicode_sigil'] }}</td> -->
+          <td>
+            <select form="sub" id="{{ result['full_id'] }}-outcome" name="{{ result['full_id'] }}-outcome"
+              class="form-select"
+              style="background-color: {{ job_outcome(result['outcome'])['color_hex'] }}; color: white;">
+              {% for outcome in [job_result.OUTCOME_PASS, job_result.OUTCOME_FAIL, job_result.OUTCOME_SKIP,
+              job_result.OUTCOME_NOT_SUPPORTED, job_result.OUTCOME_UNDECIDED, job_result.OUTCOME_CRASH] %}
+              <option {% if result['outcome']==outcome %}selected{% endif %}>{{ outcome }}</option>
+              {% endfor %}
+            </select>
+          </td>
+          <td>{{ result['certification_status'] }}</td>
+          <td><input form="sub" type="text" id="{{ result['full_id'] }}-comment" name="{{ result['full_id'] }}-comment"
+              value="{% if result['comments'] %}{{ result['comments'] }}{% endif %}" /></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <form id="sub" action="{{ url_for('index') }}" method="post">
+      <input type="hidden" id="archive" name="archive" value="{{ archive }}">
+      <button type="submit">Save as new submission archive</button>
+    </form>
+  </main>
+</body>
+
+</html>

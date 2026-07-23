@@ -1,0 +1,124 @@
+body {
+    font-size: 16px;
+    font-family: sans-serif;
+    margin: 0;
+}
+
+main {
+    padding: 1.5em;
+}
+
+input {
+    border: 1px solid #ccc;
+    line-height: 1.5em;
+    font-size: 1em;
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+th {
+    border-bottom: 1px solid #aaa;
+}
+
+tr:hover {
+    background-color: #f8f8f8 !important;
+}
+
+td {
+    text-align: center;
+}
+
+td select {
+    width: fit-content;
+    max-width: 80%;
+    border-radius: 3px;
+}
+
+td input {
+    width: 100%;
+    font-family: monospace;
+    box-sizing: border-box;
+    border-radius: 3px;
+}
+
+header {
+    padding: 1em 2em;
+    min-height: 100px;
+    background: rgb(197, 68, 35);
+    background: linear-gradient(35deg, rgba(197, 68, 35, 1) 0%, rgba(114, 18, 72, 1) 35%, rgba(56, 6, 38, 1) 100%);
+    color: #fff;
+    text-align: left;
+}
+
+.job-id {
+    overflow-wrap: anywhere;
+    text-wrap: auto;
+}
+
+footer {
+    padding: 1em 2em;
+    font-size: 1em;
+    color: #ccc;
+    text-align: right;
+}
+
+h1 {
+    font-weight: normal;
+    font-size: 2em;
+}
+
+p.warning::before {
+    content: "⚠";
+    font-size: 2.5em;
+    color: rgb(197, 68, 35);
+    vertical-align: middle;
+    margin-right: 0.5em;
+}
+
+p.warning {
+    border: 1px solid rgb(197, 68, 35);
+    padding: 1em;
+    vertical-align: middle;
+}
+
+[type="file"] {
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute !important;
+    white-space: nowrap;
+    width: 1px;
+}
+
+button,
+[type="file"]+label {
+    background-color: rgb(114, 18, 72);
+    border-radius: .5rem;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 1rem;
+    /* //font-weight: 700; */
+    height: 4rem;
+    line-height: 4rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    transition: background-color 0.3s;
+    border: none;
+}
+
+button:hover,
+[type="file"]:focus+label,
+[type="file"]+label:hover {
+    background-color: rgb(197, 68, 35);
+}
+
+[type="file"]:focus+label {
+    outline: 1px dotted #000;
+    outline: -webkit-focus-ring-color auto 5px;
+}
