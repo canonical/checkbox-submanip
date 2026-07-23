@@ -1,5 +1,5 @@
-# oem-qa-submanip
-A continuation of the submanip program on launchpad. It's meant to be a graphical editor of checkbox submissions. Edited submissions SHOULD NOT be submitted to C3.
+# checkbox-submanip
+A continuation of the oem-qa-submanip program on launchpad. It's meant to be a graphical editor of checkbox submissions. Edited submissions SHOULD NOT be submitted to C3.
 
 # Development
 
