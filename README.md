@@ -4,14 +4,14 @@ A continuation of the oem-qa-submanip program on launchpad. It's meant to be a g
 # Usage
 
 When installed as a snap, Submanip listens on `http://localhost:3001` by
-default. To change the port, use `snap set` — the web server is
+default. To change the port, use `snap set <port number>` and the web server is
 automatically restarted on the new port:
 
 ```sh
 sudo snap set checkbox-submanip port=8080
 ```
 
-To go back to the default port, unset the option:
+To go back to the default port 3001, unset the option:
 
 ```sh
 sudo snap unset checkbox-submanip port
