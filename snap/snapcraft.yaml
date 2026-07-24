@@ -1,12 +1,19 @@
+title: Checkbox Submission Editor
+license: GPL-3.0+
+issues: https://github.com/canonical/checkbox-submanip/issues
+website: https://github.com/canonical/checkbox-submanip/
+source-code: https://github.com/canonical/checkbox-submanip/
+contact: https://github.com/canonical/checkbox-submanip/issues
+
 name: checkbox-submanip
 base: core24
 version: "1.0"
 summary: Checkbox submission editor
 description: |
-  checkbox-submanip is a Checkbox submission editor. It lets you modify test
-  results and comments in a Checkbox submission archive, and saves the
-  result as a new submission archive. The snap runs Submanip as a Flask
-  web server reachable at http://localhost:3001 by default. The port can be
+  checkbox-submanip is the snap version of the Checkbox submission editor originally hosted on launchpad. 
+  It lets you modify test results and comments in a Checkbox submission archive, 
+  and saves the result as a new submission archive. The snap runs Submanip as a Flask
+  web server at http://localhost:3001 by default. The port can be
   changed with `sudo snap set checkbox-submanip port=<port>`, which
   automatically restarts the web server on the new port.
 
@@ -64,7 +71,7 @@ parts:
       - astral-uv
     after:
       - submanip-deps
-    override-build: |
+    override-build: | # shell
       craftctl default
       # the following is written by copilot 
 
