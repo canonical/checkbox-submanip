@@ -8,6 +8,7 @@ import os
 import shutil
 import sys
 import tarfile
+import threading
 from logging.handlers import RotatingFileHandler
 from tempfile import mkdtemp
 from typing import Any, Optional
@@ -126,6 +127,9 @@ class SubmanipWindow(Adw.ApplicationWindow):
         self.result_filter: Gtk.CustomFilter | None = None
         self.title_entry: Adw.EntryRow | None = None
         self.description_view: Gtk.TextView | None = None
+        self.save_button: Gtk.Button | None = None
+        self.saving_spinner: Gtk.Spinner | None = None
+        self.saving_overlay: Gtk.Widget | None = None
 
         self.toast_overlay = Adw.ToastOverlay()
         self.nav_view = Adw.NavigationView()
@@ -266,6 +270,7 @@ class SubmanipWindow(Adw.ApplicationWindow):
         save_button.connect("clicked", self.on_save_clicked)
         header.pack_end(save_button)
         toolbar_view.add_top_bar(header)
+        self.save_button = save_button
 
         self.title_entry = Adw.EntryRow(title="Session name")
         self.title_entry.set_text(data.get("title", ""))
@@ -362,7 +367,36 @@ class SubmanipWindow(Adw.ApplicationWindow):
         )
         content.append(info_group)
         content.append(results_box)
-        toolbar_view.set_content(content)
+
+        # A dimmed overlay with a spinner, shown while a new submission
+        # archive is being written out (which can take a long time).
+        self.saving_spinner = Gtk.Spinner(width_request=32, height_request=32)
+        saving_label = Gtk.Label(label="Saving submission…")
+        saving_label.add_css_class("title-4")
+        saving_box = Gtk.Box(
+            orientation=Gtk.Orientation.VERTICAL,
+            spacing=12,
+            halign=Gtk.Align.CENTER,
+            valign=Gtk.Align.CENTER,
+        )
+        saving_box.append(self.saving_spinner)
+        saving_box.append(saving_label)
+        self.saving_overlay = Gtk.Box(
+            halign=Gtk.Align.FILL,
+            valign=Gtk.Align.FILL,
+            hexpand=True,
+            vexpand=True,
+            visible=False,
+        )
+        self.saving_overlay.add_css_class("osd")
+        self.saving_overlay.append(saving_box)
+        saving_box.set_hexpand(True)
+        saving_box.set_vexpand(True)
+
+        overlay = Gtk.Overlay()
+        overlay.set_child(content)
+        overlay.add_overlay(self.saving_overlay)
+        toolbar_view.set_content(overlay)
 
         return Adw.NavigationPage(
             child=toolbar_view, title=data.get("title", "Edit"), tag="edit"
@@ -548,15 +582,41 @@ class SubmanipWindow(Adw.ApplicationWindow):
             form_data[row.full_id + "-outcome"] = row.outcome
             form_data[row.full_id + "-comment"] = row.comment
 
+        self._set_saving(True)
+        thread = threading.Thread(
+            target=self._save_worker, args=(form_data, dest_path), daemon=True
+        )
+        thread.start()
+
+    def _set_saving(self, saving: bool) -> None:
+        self.save_button.set_sensitive(not saving)
+        self.saving_overlay.set_visible(saving)
+        if saving:
+            self.saving_spinner.start()
+        else:
+            self.saving_spinner.stop()
+
+    def _save_worker(self, form_data: dict[str, Any], dest_path: str) -> None:
+        """Runs off the main thread: building the submission archive can
+        take a long time, and must not block the UI."""
         try:
             submission = CheckboxSubmission(self.temp_arc, form_data)
             shutil.copyfile(submission.output_file, dest_path)
         except Exception as e:
             logger.exception("Failed to save submission")
-            self.toast_overlay.add_toast(Adw.Toast(title=f"Failed to save: {e}"))
+            GLib.idle_add(self._on_save_finished, False, str(e))
             return
+        GLib.idle_add(self._on_save_finished, True, "")
 
-        self.toast_overlay.add_toast(Adw.Toast(title="Submission saved"))
+    def _on_save_finished(self, success: bool, error_message: str) -> bool:
+        self._set_saving(False)
+        if success:
+            self.toast_overlay.add_toast(Adw.Toast(title="Submission saved"))
+        else:
+            self.toast_overlay.add_toast(
+                Adw.Toast(title=f"Failed to save: {error_message}")
+            )
+        return GLib.SOURCE_REMOVE
 
 
 class SubmanipApplication(Adw.Application):
