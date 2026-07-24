@@ -93,9 +93,7 @@ def build_outcome_css() -> Gtk.CssProvider:
         " border-radius: 6px;"
         " min-height: 24px;"
         "}",
-        ".submanip-cell {"
-        " margin: 2px;"
-        "}",
+        ".submanip-cell { margin: 2px;}",
     ]
     for outcome in OUTCOMES:
         meta = outcome_meta(outcome)
@@ -116,7 +114,9 @@ class SubmanipWindow(Adw.ApplicationWindow):
         super().__init__(application=app, title="Checkbox Submission Editor")
         self.set_default_size(1100, 750)
 
-        self.outcome_model: Gio.ListStore[OutcomeOption] = Gio.ListStore(item_type=OutcomeOption)
+        self.outcome_model: Gio.ListStore[OutcomeOption] = Gio.ListStore(
+            item_type=OutcomeOption
+        )
         for outcome in OUTCOMES:
             self.outcome_model.append(OutcomeOption(outcome))
 
@@ -209,14 +209,16 @@ class SubmanipWindow(Adw.ApplicationWindow):
         dialog.set_filters(filters)
         dialog.open(self, None, self._on_open_dialog_done)
 
-    def _on_open_dialog_done(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
+    def _on_open_dialog_done(
+        self, dialog: Gtk.FileDialog, result: Gio.AsyncResult
+    ) -> None:
         try:
             gfile = dialog.open_finish(result)
         except GLib.Error as e:
             if not e.matches(Gtk.DialogError.quark(), Gtk.DialogError.DISMISSED):
                 logger.warning("File open dialog failed: %s", e)
             return
-        
+
         filepath = gfile.get_path()
         assert filepath
         self.load_submission(filepath)
@@ -255,7 +257,9 @@ class SubmanipWindow(Adw.ApplicationWindow):
         self.visible_outcomes = set(OUTCOMES)
         self.search_text = ""
         self.result_filter = Gtk.CustomFilter.new(self._filter_func)
-        filter_model = Gtk.FilterListModel(model=self.list_store, filter=self.result_filter)
+        filter_model = Gtk.FilterListModel(
+            model=self.list_store, filter=self.result_filter
+        )
         selection_model = Gtk.NoSelection(model=filter_model)
 
         toolbar_view = Adw.ToolbarView()
@@ -408,13 +412,9 @@ class SubmanipWindow(Adw.ApplicationWindow):
         column_view.append_column(
             self._make_label_column("ID", "display_id", expand=True)
         )
-        column_view.append_column(
-            self._make_label_column("Category", "category")
-        )
+        column_view.append_column(self._make_label_column("Category", "category"))
         column_view.append_column(self._make_outcome_column())
-        column_view.append_column(
-            self._make_label_column("Cert Status", "cert_status")
-        )
+        column_view.append_column(self._make_label_column("Cert Status", "cert_status"))
         column_view.append_column(self._make_comment_column())
         return column_view
 
@@ -459,7 +459,9 @@ class SubmanipWindow(Adw.ApplicationWindow):
             )
             dropdown._submanip_handler_id = handler_id
 
-        def unbind(_factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:
+        def unbind(
+            _factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+        ) -> None:
             dropdown: Gtk.DropDown = list_item.get_child()
             handler_id = getattr(dropdown, "_submanip_handler_id", None)
             if handler_id is not None:
@@ -490,7 +492,9 @@ class SubmanipWindow(Adw.ApplicationWindow):
             )
             entry._submanip_handler_id = handler_id
 
-        def unbind(_factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem) -> None:
+        def unbind(
+            _factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem
+        ) -> None:
             entry: Gtk.Entry = list_item.get_child()
             handler_id = getattr(entry, "_submanip_handler_id", None)
             if handler_id is not None:
@@ -511,7 +515,9 @@ class SubmanipWindow(Adw.ApplicationWindow):
                 return i
         return 0
 
-    def _style_outcome_dropdown(self, dropdown: Gtk.DropDown, outcome: str | None) -> None:
+    def _style_outcome_dropdown(
+        self, dropdown: Gtk.DropDown, outcome: str | None
+    ) -> None:
         for candidate in OUTCOMES:
             dropdown.remove_css_class(outcome_css_class(candidate))
         dropdown.add_css_class(outcome_css_class(outcome))
@@ -556,7 +562,9 @@ class SubmanipWindow(Adw.ApplicationWindow):
         dialog.set_filters(filters)
         dialog.save(self, None, self._on_save_dialog_done)
 
-    def _on_save_dialog_done(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult) -> None:
+    def _on_save_dialog_done(
+        self, dialog: Gtk.FileDialog, result: Gio.AsyncResult
+    ) -> None:
         try:
             gfile = dialog.save_finish(result)
         except GLib.Error as e:
