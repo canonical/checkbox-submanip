@@ -7,15 +7,13 @@ from tempfile import TemporaryDirectory, mkdtemp
 from plainbox.impl.ctrl import gen_rfc822_records_from_io_log
 from plainbox.impl.providers.special import get_exporters
 from plainbox.impl.resource import Resource
-from plainbox.impl.result import IOLogRecord
-from plainbox.impl.result import MemoryJobResult
+from plainbox.impl.result import IOLogRecord, MemoryJobResult, outcome_meta
 from plainbox.impl.session import SessionManager
-from plainbox.impl.unit.category import CategoryUnit
-from plainbox.impl.unit.job import JobDefinition
-from plainbox.impl.result import outcome_meta
 from plainbox.impl.session.system_information import (
     CollectorOutputs,
 )
+from plainbox.impl.unit.category import CategoryUnit
+from plainbox.impl.unit.job import JobDefinition
 
 # Name-space prefix for Canonical Certification
 CERTIFICATION_NS = "com.canonical.certification::"
@@ -110,13 +108,12 @@ class CheckboxSubmission:
                 comment = (
                     form_data.get(
                         result["full_id"] + "-comment",
-                        default=result["comments"],
+                        result["comments"],
                     )
                     or None
                 )
-                # import pdb; pdb.set_trace()
                 outcome = form_data.get(
-                    result["full_id"] + "-outcome", default=result["outcome"]
+                    result["full_id"] + "-outcome", result["outcome"]
                 )
                 result["comments"] = comment
                 result["status"] = outcome_meta(outcome).hexr_mapping
