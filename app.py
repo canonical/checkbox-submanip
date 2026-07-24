@@ -31,17 +31,26 @@ logger.addHandler(fh)
 
 __version__ = "1.0"
 
-metadata = {"checkbox_version": checkbox_version, "submanip_version": __version__}
+metadata = {
+    "checkbox_version": checkbox_version,
+    "submanip_version": __version__,
+}
 
 app = Flask(__name__)
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # required for flash messages
+DEFAULT_PORT = 3001
 
 
 @app.context_processor
 def job_result():
     """Provide job information to the Flask template"""
-    outcomes = [getattr(IJobResult, k) for k in dir(IJobResult) if k.startswith("OUTCOME")]
-    return dict(job_result=IJobResult, job_outcome=outcome_meta, job_result_outcomes=outcomes)
+    outcomes = [
+        getattr(IJobResult, k) for k in dir(IJobResult) if k.startswith("OUTCOME")
+    ]
+    return dict(
+        job_result=IJobResult,
+        job_outcome=outcome_meta,
+        job_result_outcomes=outcomes,
+    )
 
 
 @app.route("/", methods=("GET", "POST"))
@@ -89,5 +98,36 @@ def subedit():
         return redirect(url_for("index"))
 
 
+def get_port():
+    """Determine the port to listen on.
+
+    Priority order:
+    1. The `PORT` environment variable, if set to a valid integer.
+    2. The value written by the snap's `configure` hook to
+       `$SNAP_DATA/port` (populated via `snap set checkbox-submanip
+       port=<port>`).
+    3. DEFAULT_PORT.
+    """
+    port_env = os.environ.get("PORT")
+    if port_env:
+        try:
+            return int(port_env)
+        except ValueError:
+            logger.warning("Ignoring invalid PORT env var: %r", port_env)
+
+    snap_data = os.environ.get("SNAP_DATA")
+    if snap_data:
+        port_file = os.path.join(snap_data, "port")
+        try:
+            with open(port_file) as f:
+                return int(f.read().strip())
+        except FileNotFoundError:
+            pass
+        except (ValueError, OSError) as e:
+            logger.warning("Ignoring invalid port file %s: %s", port_file, e)
+
+    return DEFAULT_PORT
+
+
 if __name__ == "__main__":
-    app.run(port=3001)
+    app.run(port=get_port())

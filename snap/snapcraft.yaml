@@ -6,7 +6,9 @@ description: |
   checkbox-submanip is a Checkbox submission editor. It lets you modify test
   results and comments in a Checkbox submission archive, and saves the
   result as a new submission archive. The snap runs Submanip as a Flask
-  web server reachable at http://localhost:3001.
+  web server reachable at http://localhost:3001 by default. The port can be
+  changed with `sudo snap set checkbox-submanip port=<port>`, which
+  automatically restarts the web server on the new port.
 
 grade: stable
 confinement: strict

@@ -1,0 +1,23 @@
+#!/bin/sh
+set -e
+
+port="$(snapctl get port)"
+
+if [ -n "$port" ]; then
+    case "$port" in
+        ''|*[!0-9]*)
+            echo "checkbox-submanip: 'port' must be a positive integer, got '$port'" >&2
+            exit 1
+            ;;
+    esac
+    if [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+        echo "checkbox-submanip: 'port' must be between 1 and 65535, got '$port'" >&2
+        exit 1
+    fi
+    echo "$port" > "$SNAP_DATA/port"
+else
+    rm -f "$SNAP_DATA/port"
+fi
+
+# Pick up the new port immediately.
+snapctl restart "$SNAP_NAME.submanip"

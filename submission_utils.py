@@ -49,7 +49,10 @@ class CheckboxSubmission:
         manager.state.metadata.rejected_jobs = [
             j["full_id"] for j in self.rejected_jobs
         ]
-        blob = {"description": self.description, "testplan_id": self.testplan_id}
+        blob = {
+            "description": self.description,
+            "testplan_id": self.testplan_id,
+        }
         self.update_app_blob(manager, json.dumps(blob).encode("UTF-8"))
         for job in self.job_dict.values():
             self._populate_session_state(job, manager.state)
@@ -106,7 +109,8 @@ class CheckboxSubmission:
                 # from the user-submitted HTML form
                 comment = (
                     form_data.get(
-                        result["full_id"] + "-comment", default=result["comments"]
+                        result["full_id"] + "-comment",
+                        default=result["comments"],
                     )
                     or None
                 )
