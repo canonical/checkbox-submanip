@@ -33,10 +33,10 @@ package-repositories:
     ppa: checkbox-dev/edge
 
 # used by checkbox-ng
-# we are not actually launching sessions, so just put it in the data dir
+# we are not actually launching sessions, so just put it in tmp
 layout:
   /var/tmp/checkbox-ng:
-    bind: $SNAP_DATA/checkbox-ng
+    type: tmpfs
 
 apps:
   submanip:
