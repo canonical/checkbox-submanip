@@ -4,4 +4,4 @@
 mkdir -p "$SNAP_COMMON/checkbox-ng"
 
 # Make it writable by any user running the snap
-chmod 777 "$SNAP_COMMON/checkbox-ng"
+chmod 1777 "$SNAP_COMMON/checkbox-ng"
