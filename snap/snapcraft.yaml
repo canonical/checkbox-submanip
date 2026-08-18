@@ -36,7 +36,7 @@ package-repositories:
 # we are not actually launching sessions, so just put it in tmp
 layout:
   /var/tmp/checkbox-ng:
-    type: tmpfs
+    bind: $SNAP_COMMON/checkbox-ng
 
 apps:
   submanip:
