@@ -33,10 +33,10 @@ package-repositories:
     ppa: checkbox-dev/edge
 
 # used by checkbox-ng
-# we are not actually launching sessions, so just put it in the data dir
+# we are not actually launching sessions, so just put it in tmp
 layout:
   /var/tmp/checkbox-ng:
-    bind: $SNAP_DATA/checkbox-ng
+    bind: $SNAP_COMMON/checkbox-ng
 
 apps:
   submanip:
@@ -45,6 +45,12 @@ apps:
     restart-condition: on-failure
     plugs:
       - network-bind
+
+  merge-reports:
+    command: usr/bin/checkbox-cli merge-reports
+    plugs:
+      - home
+      - removable-media
 
 parts:
   submanip-source:
@@ -63,6 +69,13 @@ parts:
     stage-packages:
       - checkbox-ng
       - python3-checkbox-ng
+    override-build: | # shell
+      craftctl default
+      # replace the stock checkbox.html exporter template with our own
+      cp "$CRAFT_PROJECT_DIR/noautoescape-single-page.html" \
+        "$CRAFT_PART_INSTALL/usr/lib/python3/dist-packages/plainbox/impl/providers/exporters/data/checkbox.html"
+      cp "$CRAFT_PROJECT_DIR/noautoescape-multi-page.html" \
+        "$CRAFT_PART_INSTALL/usr/lib/python3/dist-packages/plainbox/impl/providers/exporters/data/multi-page.html"
 
   submanip-venv:
     plugin: uv
