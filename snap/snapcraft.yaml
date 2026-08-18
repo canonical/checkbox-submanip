@@ -46,9 +46,6 @@ apps:
     plugs:
       - network-bind
 
-  py:
-    command: bin/python3
-
   merge-reports:
     command: usr/bin/checkbox-cli merge-reports
     plugs:
